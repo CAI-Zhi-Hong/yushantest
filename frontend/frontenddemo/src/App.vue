@@ -58,16 +58,29 @@ const createProductEvent = async() => {
   }).then(async res=>{
     if(!res.ok){
       errorStatus.value=true;
-    }else{
-      await fetchUserData()
+    // }else{
+    //   // await fetchUserData()
     }    
-    return res
+    return res.text
+  }).then(obj=>{
+    if(selectUserData.value){
+      selectUserData.value.userPortfolios = selectUserData.value.userPortfolios.concat({
+        account:createNewProduct.value.account! ,
+        orderName:createNewProduct.value.orderName!,
+        feeRate:createNewProduct.value.feeRate!,
+        price:createNewProduct.value.price!,
+        productName:createNewProduct.value.productName!,
+        sn: obj as unknown as number,
+        totalAmount: Math.round(createNewProduct.value.orderName!*createNewProduct.value.price! + createNewProduct.value.feeRate!*createNewProduct.value.price!*createNewProduct.value.orderName!),
+        totalFee:Math.round(createNewProduct.value.feeRate!*createNewProduct.value.price!*createNewProduct.value.orderName!),
+      })
+    }
   }).catch(_err=>{
     errorStatus.value=false
   });
 }
 
-const deleteProductEvent = async( sn:number ) => {
+const deleteProductEvent = async( sn:number, index:number ) => {
   await fetch('http://localhost:8080/api/likelist/user-delete-like-list', {
     method: 'POST',
     headers: {
@@ -81,13 +94,19 @@ const deleteProductEvent = async( sn:number ) => {
     if(!res.ok){
       errorStatus.value=true;
     }else{
-      await fetchUserData()
+      if(selectUserData.value){
+        selectUserData.value.userPortfolios.splice(index,1)
+      }
     }    
     return res
   }).catch(_err=>{
     errorStatus.value=false
   });
 }
+
+// const deleteProductElement=(sn:number)=>{
+//   selectUserData.value?.userPortfolios=selectUserData.value!.userPortfolios.filter(obj=>obj.sn!==sn)
+// }
 
 const fetchUserData = async() => {
    await fetch('http://127.0.0.1:8080/api/likelist/user-select-like-list', {
@@ -137,9 +156,9 @@ const fetchUserData = async() => {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(data) in selectUserData.userPortfolios" :key="data.sn">
+            <tr v-for="(data, index) in selectUserData.userPortfolios" :key="data.sn">
               <td>
-                <div @click="deleteProductEvent(data.sn)" class="hover:bg-red-100 cursor-pointer" >Delete</div>
+                <div @click="deleteProductEvent(data.sn, index)" class="hover:bg-red-100 cursor-pointer" >Delete</div>
               </td>
               <td>Update</td>
               <td>{{ data.productName }}</td>
@@ -152,6 +171,7 @@ const fetchUserData = async() => {
             </tr>
           </tbody>
         </table>
+        
       </div>
     </div>
 

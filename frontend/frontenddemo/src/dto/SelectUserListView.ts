@@ -11,7 +11,6 @@ export interface SelectUserListView {
         sn: number,
         totalAmount:number,
         totalFee:number,
-        no:number
     }[]
 }
 

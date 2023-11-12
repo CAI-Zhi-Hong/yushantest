@@ -33,8 +33,8 @@ import com.yushantest.demo.entities.LikeList;
 // )
 
 public interface LikeListRepo extends JpaRepository<LikeList, Integer>{
-    @Procedure(name = "Insert_User_Like_List")
-    void Insert_User_Like_List(
+    @Procedure(name = "Insert_User_Like_List", outputParameterName="Out_Last_Index")
+    int Insert_User_Like_List(
         @Param("In_Uid") String In_Uid,
         @Param("In_Product_Name") String In_Product_Name,
         @Param("In_Product_Price") int In_Product_Price,
@@ -46,23 +46,25 @@ public interface LikeListRepo extends JpaRepository<LikeList, Integer>{
     /*
         DROP PROCEDURE IF EXISTS `Insert_User_Like_List`;
         DELIMITER //
-        CREATE PROCEDURE `Insert_User_Like_List` (IN `In_Uid` VARCHAR(255), IN `In_Product_Name` VARCHAR(255), IN `In_Product_Price` INT, IN `In_Product_FeeRate` DOUBLE, IN `In_Default_Account` VARCHAR(255), `In_Order_Name` INT)   
+        CREATE PROCEDURE `Insert_User_Like_List` (IN `In_Uid` VARCHAR(255), IN `In_Product_Name` VARCHAR(255), IN `In_Product_Price` INT, IN `In_Product_FeeRate` DOUBLE, IN `In_Default_Account` VARCHAR(255), `In_Order_Name` INT, OUT `Out_Last_Index` INT)   
         main:BEGIN
                 
             INSERT INTO `product`(`fee_rate`,`price`,`product_name`)
             SELECT In_Product_FeeRate, In_Product_Price, In_Product_Name
             FROM `user`
-            WHERE `user`.`user_id` = IN_Uid;
+            WHERE `user`.`user_id` = In_Uid;
             
-            IF LAST_INSERT_ID() > 0 THEN
+            IF ROW_COUNT() > 0 THEN
                 INSERT INTO `like list`(`account`, `order_name`, `total_amount`, `total_fee`, `no`, `user_id`)
                 SELECT In_Default_Account, In_Order_Name, ROUND((In_Product_Price*In_Product_FeeRate*In_Order_Name) + (In_Product_Price*In_Order_Name),0), (In_Product_Price*In_Product_FeeRate*In_Order_Name), LAST_INSERT_ID(), In_Uid
                 FROM `user`
                 WHERE `user`.`user_id` = IN_Uid;
+                
+                SELECT LAST_INSERT_ID() INTO Out_Last_Index;
+            ELSE
+            	SELECT -1 INTO Out_Last_Index;
             END IF;
         END
-        //
-        DELIMITER ;
     */
 
     
