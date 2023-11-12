@@ -18,10 +18,17 @@ public class LikeListService{
 
 
     // correspend to InsertLikeListParamsModel
-    public void insertUserLikeListFn(
+    public Integer insertUserLikeListFn(
         InsertLikeListParamsDto params
     ) {
-        likeListRepo.Insert_User_Like_List(params.getUid(), params.getProductName(), params.getProductPrice(), params.getProductFeeRate(), params.getDefaultAccount(), params.getOrderName());      
+        Integer newIndex = likeListRepo.Insert_User_Like_List(
+            params.getUid(), params.getProductName(), 
+            params.getProductPrice(), 
+            params.getProductFeeRate(), 
+            params.getDefaultAccount(), 
+            params.getOrderName()
+        );
+        return newIndex; 
     }
 
 
@@ -48,6 +55,7 @@ public class LikeListService{
             user.getAccount(),
             user.getEmail(),
             user.getUserName()
+
         );
 
         return selectLikeListReturnDto;      

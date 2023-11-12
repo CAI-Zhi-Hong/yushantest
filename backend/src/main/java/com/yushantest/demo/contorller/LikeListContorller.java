@@ -26,7 +26,7 @@ public class LikeListContorller {
     private LikeListService likeListService;
 
     @PostMapping("/user-insert-like-list")
-    public ResponseEntity<String> userInsertLikeList(
+    public ResponseEntity<?> userInsertLikeList(
         @RequestBody @Valid InsertLikeListParamsDto params,
         BindingResult bindingResult
     ) {
@@ -36,8 +36,8 @@ public class LikeListContorller {
         }
 
         try {
-            likeListService.insertUserLikeListFn(params);
-            return new ResponseEntity<>("Operation executed successfully", HttpStatus.OK);
+            Integer index = likeListService.insertUserLikeListFn(params);
+            return new ResponseEntity<Integer>(index, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("Operation failed: parameter error" + e.getMessage(), HttpStatus.valueOf(402));
         }

@@ -8,18 +8,19 @@ public class SelectLikeListReturnDto {
     private String userName;
     private List<SelectLikeListDto> userPortfolios;
     
-    public String getUserName() {
-        return userName;
-    }
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
+    
     public String getUserAccount() {
         return userAccount;
     }
     public void setUserAccount(String userAccount) {
         this.userAccount = userAccount;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
     
    

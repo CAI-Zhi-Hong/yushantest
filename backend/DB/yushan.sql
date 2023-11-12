@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主機： 127.0.0.1
--- 產生時間： 2023-11-11 10:53:47
+-- 產生時間： 2023-11-12 12:30:35
 -- 伺服器版本： 10.4.28-MariaDB
 -- PHP 版本： 8.2.4
 
@@ -40,26 +40,30 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `Delete_User_Like_List` (IN `In_Uid`
             END IF;
         END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `Insert_User_Like_List` (IN `In_Uid` VARCHAR(255), IN `In_Product_Name` VARCHAR(255), IN `In_Product_Price` INT, IN `In_Product_FeeRate` DOUBLE, IN `In_Default_Account` VARCHAR(255), `In_Order_Name` INT)   main:BEGIN
-            
+CREATE DEFINER=`root`@`localhost` PROCEDURE `Insert_User_Like_List` (IN `In_Uid` VARCHAR(255), IN `In_Product_Name` VARCHAR(255), IN `In_Product_Price` INT, IN `In_Product_FeeRate` DOUBLE, IN `In_Default_Account` VARCHAR(255), `In_Order_Name` INT, OUT `Out_Last_Index` INT)   main:BEGIN
+                
             INSERT INTO `product`(`fee_rate`,`price`,`product_name`)
             SELECT In_Product_FeeRate, In_Product_Price, In_Product_Name
             FROM `user`
-            WHERE `user`.`user_id` = IN_Uid;
+            WHERE `user`.`user_id` = In_Uid;
             
-            IF LAST_INSERT_ID() > 0 THEN
+            IF ROW_COUNT() > 0 THEN
                 INSERT INTO `like list`(`account`, `order_name`, `total_amount`, `total_fee`, `no`, `user_id`)
                 SELECT In_Default_Account, In_Order_Name, ROUND((In_Product_Price*In_Product_FeeRate*In_Order_Name) + (In_Product_Price*In_Order_Name),0), (In_Product_Price*In_Product_FeeRate*In_Order_Name), LAST_INSERT_ID(), In_Uid
                 FROM `user`
                 WHERE `user`.`user_id` = IN_Uid;
-			END IF;
-   END$$
+                
+                SELECT LAST_INSERT_ID() INTO Out_Last_Index;
+            ELSE
+            	SELECT -1 INTO Out_Last_Index;
+            END IF;
+        END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `Select_User` (IN `In_Uid` VARCHAR(255))   main:BEGIN
-        	SELECT `user`.`user_id`,`user`.`account`,`user`.`email`,`user`.`user_name`
-            FROM `user`
-            WHERE `user`.`user_id` = In_Uid;
-        END$$
+                SELECT `user`.`user_id`,`user`.`account`,`user`.`email`,`user`.`user_name`
+                FROM `user`
+                WHERE `user`.`user_id` = In_Uid;
+            END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `Select_User_Like_List` (IN `In_Uid` VARCHAR(255))   main:BEGIN
         	SELECT `like list`.`sn`, `like list`.`account`, `like list`.`order_name` as `orderName` , `like list`.`total_amount` as `totalAmount`, `like list`.`total_fee` as `totalFee`, `product`.`no`, `product`.`fee_rate` as `feeRate`, `product`.`price`, `product`.`product_name` as `productName`
@@ -103,9 +107,9 @@ CREATE TABLE `like list` (
 --
 
 INSERT INTO `like list` (`sn`, `account`, `order_name`, `total_amount`, `total_fee`, `no`, `user_id`) VALUES
-(1, '11115555555', 2, 192, 32, 1, 'A123456789'),
+(1, '11115555555', 2, 194, 32, 1, 'A123456789'),
 (2, '11133344455', 1, 6000, 1000, 2, 'A123456789'),
-(3, '1166554488', 4, 5200, 1200, 3, 'A123456789');
+(17, '1535456737', 5, 3050, 550, 17, 'A123456789');
 
 -- --------------------------------------------------------
 
@@ -125,9 +129,9 @@ CREATE TABLE `product` (
 --
 
 INSERT INTO `product` (`no`, `fee_rate`, `price`, `product_name`) VALUES
-(1, 0.2, 80, '金融商品A'),
+(1, 0.2, 81, '金融商品A'),
 (2, 0.2, 5000, '金融商品BB'),
-(3, 0.3, 1000, '金融AA');
+(17, 0.22, 500, '金融AA');
 
 -- --------------------------------------------------------
 
@@ -181,13 +185,13 @@ ALTER TABLE `user`
 -- 使用資料表自動遞增(AUTO_INCREMENT) `like list`
 --
 ALTER TABLE `like list`
-  MODIFY `sn` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `sn` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- 使用資料表自動遞增(AUTO_INCREMENT) `product`
 --
 ALTER TABLE `product`
-  MODIFY `no` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `no` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- 已傾印資料表的限制式
