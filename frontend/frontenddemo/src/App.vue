@@ -57,6 +57,8 @@ const submitUpdate = async () => {
     alert('欲修改購買數量不得為空！');
     return;
   }
+
+  console.log(choiceUpdateData.value)
   
   await fetch('http://localhost:8080/api/likelist/user-update-like-list', {
     method: 'POST',
@@ -124,7 +126,7 @@ const createProductEvent = async() => {
     // }else{
     //   // await fetchUserData()
     }    
-    return res.text
+    return res.text()
   }).then(obj=>{
     if(selectUserData.value){
       selectUserData.value.userPortfolios = selectUserData.value.userPortfolios.concat({
@@ -190,7 +192,6 @@ const fetchUserData = async() => {
   }).catch(_err=>{
     errorStatus.value=false
   });
-  console.log(selectUserData.value?.userEmail)
 };
 
 
