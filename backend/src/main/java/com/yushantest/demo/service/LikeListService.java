@@ -46,8 +46,7 @@ public class LikeListService{
         SelectLikeListReturnDto selectLikeListReturnDto = new SelectLikeListReturnDto(
             selectLikeListDtoArray,
             user.getAccount(),
-            user.getEmail(),
-            user.getUserName()
+            user.getEmail()
         );
 
         return selectLikeListReturnDto;      

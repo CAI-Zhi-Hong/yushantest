@@ -5,16 +5,9 @@ import java.util.List;
 public class SelectLikeListReturnDto {
     private String userAccount;
     private String userEmail;
-    private String userName;
     private List<SelectLikeListDto> userPortfolios;
     
-    public String getUserName() {
-        return userName;
-    }
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
+    
     public String getUserAccount() {
         return userAccount;
     }
@@ -38,11 +31,10 @@ public class SelectLikeListReturnDto {
     }
     
     public SelectLikeListReturnDto () {}
-    public SelectLikeListReturnDto( List<SelectLikeListDto> userPortfolios, String userAccount, String userEmail, String userName) {
+    public SelectLikeListReturnDto( List<SelectLikeListDto> userPortfolios, String userAccount, String userEmail) {
         this.userPortfolios = userPortfolios;
         this.userAccount = userAccount;
         this.userEmail = userEmail;
-        this.userName = userName;
     }
    
 }

@@ -1,15 +1,24 @@
 export interface SelectUserListView {
     userAccount:string|null,
     userEmail:string|null,
+    userName:string|null,
     userPortfolios:{
-         sn: number,
-         account:String,
-         orderName:number,
-         totalAmount:number,
-         totalFee:number,
-         no:number,
-         feeRate:number,
-         price:number,
-         productName:string
+        account:String,
+        orderName:number,
+        feeRate:number,
+        price:number,
+        productName:string,
+        sn: number,
+        totalAmount:number,
+        totalFee:number,
+        no:number
     }[]
+}
+
+export interface UserPortFolio{
+    account:String|undefined,
+    orderName:number|undefined,
+    feeRate:number|undefined,
+    price:number|undefined,
+    productName:string|undefined
 }
