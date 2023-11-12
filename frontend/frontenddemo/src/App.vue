@@ -203,7 +203,7 @@ const fetchUserData = async() => {
       <HanderIdSelect :userId="inputUserId" :userEmail="selectUserData?.userEmail" :userName="selectUserData?.userName"  @update:inputUserId="handleUserIdUpdate"/> 
     </div>
 
-    <div class="bg-pink-100 w-full h-4/6 text-2xl px-4 py-4">
+    <div class="bg-pink-100 w-full h-4/6 text-2xl px-4 py-4 overflow-y-auto">
       <div v-if="selectUserData?.userAccount">
         <ul>
           <div class="border border-collapse border-gray-300 bg-green-50 w-full flex justify-evenly text-center underline py-2">
