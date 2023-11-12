@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import HanderIdSelect from './components/HanderIdSelect.vue'
-import {SelectUserListView, UserPortFolio} from './dto/SelectUserListView'
+import {ChoicePortfolio, SelectUserListView, UserPortFolio} from './dto/SelectUserListView'
 import { ref, watch } from 'vue'
-
 const selectUserData = ref<SelectUserListView|null>(null);
 const inputUserId = ref<string>('');
 const errorStatus = ref(false);
+
+const choiceUpdateData = ref<ChoicePortfolio|null>(null);
+let oldData:ChoicePortfolio|null = null;
+const choiceUpdateIndex = ref<number|null>(null);
+
 const createNewProduct = ref<UserPortFolio>({
     account:undefined,
     orderName:undefined,
@@ -18,12 +22,71 @@ const handleUserIdUpdate = (value: string) => {
   inputUserId.value = value;
 };
 
+const choiceUpdateRow = (data:ChoicePortfolio, index:number)=>{
+  choiceUpdateIndex.value=index;
+  choiceUpdateData.value={...data};
+  oldData={...data};
+}
+
+const cancellUpdate = () => {
+  choiceUpdateData.value = oldData;
+  choiceUpdateIndex.value = null;
+  oldData = null;
+}
 
 watch(inputUserId, (newValue, _oldValue) => {
   if(newValue){
     fetchUserData()
   }
 });
+
+const submitUpdate = async () => {
+  if (choiceUpdateData.value?.productName === undefined) {
+    alert('欲修改產品名稱不得為空！');
+    return;
+  }else if (choiceUpdateData.value?.price === undefined) {
+    alert('欲修改產品價格不得為空！');
+    return;
+  }else if (choiceUpdateData.value?.feeRate === undefined) {
+    alert('欲修改手續費費率不得為空！');
+    return;
+  }else if (choiceUpdateData.value?.account === undefined) {
+    alert('欲修改扣款帳號不得為空！');
+    return;
+  }else if (choiceUpdateData.value?.orderName === undefined) {
+    alert('欲修改購買數量不得為空！');
+    return;
+  }
+  
+  await fetch('http://localhost:8080/api/likelist/user-update-like-list', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json', 
+    },
+    body: JSON.stringify({
+      uid: inputUserId.value,
+      likeListSN: choiceUpdateData.value.sn,
+      account: choiceUpdateData.value.account,
+      orderName: choiceUpdateData.value.orderName,
+      feeRate: choiceUpdateData.value.feeRate,
+      price: choiceUpdateData.value.price,
+      productName: choiceUpdateData.value.productName     
+    }),
+  }).then(async res=>{
+    if(!res.ok){
+      errorStatus.value=true;
+      cancellUpdate();
+      alert('Update Failed！');
+    }else{
+      if(selectUserData.value && choiceUpdateIndex.value){
+        selectUserData.value.userPortfolios[choiceUpdateIndex.value] = choiceUpdateData.value!
+      }
+      choiceUpdateIndex.value = null;
+    }    
+    return res
+  }).catch(_err=>{
+    errorStatus.value=false
+  });}
 
 const createProductEvent = async() => {
   if (createNewProduct.value.productName === undefined) {
@@ -139,39 +202,47 @@ const fetchUserData = async() => {
       <HanderIdSelect :userId="inputUserId" :userEmail="selectUserData?.userEmail" :userName="selectUserData?.userName"  @update:inputUserId="handleUserIdUpdate"/> 
     </div>
 
-    <div class="bg-pink-100 w-full h-4/6 underline text-2xl px-4 py-4">
+    <div class="bg-pink-100 w-full h-4/6 text-2xl px-4 py-4">
       <div v-if="selectUserData?.userAccount">
-        <table class="table-auto border border-collapse border-gray-300 bg-green-50 w-full text-center">
-          <thead>
-            <tr>
-              <th></th>
-              <th></th>
-              <th>金融產品名稱</th>
-              <th>單價</th>
-              <th>預計購買數量</th>
-              <th>手續費費率</th>
-              <th>預計總手續費</th>
-              <th>預計總金額</th>
-              <th>預計扣款帳號</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(data, index) in selectUserData.userPortfolios" :key="data.sn">
-              <td>
-                <div @click="deleteProductEvent(data.sn, index)" class="hover:bg-red-100 cursor-pointer" >Delete</div>
-              </td>
-              <td>Update</td>
-              <td>{{ data.productName }}</td>
-              <td>{{ data.price }}</td>
-              <td>{{ data.orderName }}</td>
-              <td>{{ data.feeRate }}</td>
-              <td>{{ data.totalFee }}</td>
-              <td>{{ data.totalAmount }}</td>
-              <td>{{ data.account }}</td>
-            </tr>
-          </tbody>
-        </table>
-        
+        <ul>
+          <div class="border border-collapse border-gray-300 bg-green-50 w-full flex justify-evenly text-center underline py-2">
+            <div class="w-40"></div>
+            <div class="w-40"></div>
+            <div class="w-40">金融產品名稱</div>
+            <div class="w-40">單價</div>
+            <div class="w-40">預計購買數量</div>
+            <div class="w-40">手續費費率</div>
+            <div class="w-40">預計總手續費</div>
+            <div class="w-40">預計總金額</div>
+            <div class="w-40">預計扣款帳號</div>
+          </div>
+          <li v-for="(data, index) in selectUserData.userPortfolios" :key="data.sn">
+            <div v-if="index!==choiceUpdateIndex" class="border border-collapse border-gray-300 bg-green-50 w-full flex justify-evenly text-center py-2">
+              <div class="w-40 hover:bg-red-100 cursor-pointer" @click="deleteProductEvent(data.sn, index)" >Delete</div>
+              <div class="w-40 hover:bg-red-100 cursor-pointer" @click="choiceUpdateRow(data, index)">Update</div>
+              <div class="w-40">{{ data.productName }}</div>
+              <div class="w-40">{{ data.price }}</div>
+              <div class="w-40">{{ data.orderName }}</div>
+              <div class="w-40">{{ data.feeRate }}</div>
+              <div class="w-40">{{ data.totalFee }}</div>
+              <div class="w-40">{{ data.totalAmount }}</div>
+              <div class="w-40">{{ data.account }}</div>
+            </div>
+            <div v-if="index==choiceUpdateIndex && choiceUpdateData">
+              <div class="border border-collapse border-gray-300 bg-blue-50 w-full flex justify-evenly text-center py-2">
+                <div class="w-40 hover:bg-red-100 cursor-pointer" @click="submitUpdate">Submit</div>
+                <div class="w-40 hover:bg-red-100 cursor-pointer" @click="cancellUpdate" @keydown.esc="cancellUpdate">Cancelled</div>
+                <input id="newProductName" name="newProductName" class="w-40 placeholder-middle text-center rounded-lg border border-indigo-600" type="text" v-model="choiceUpdateData.productName" :minlength="1" required>   
+                <input id="newProductPrice" name="newProductPrice" class="w-40 placeholder-middle text-center rounded-lg border border-indigo-600 pl-4" type="number" placeholder="1" min="0" v-model="choiceUpdateData.price" required />
+                <input id="newOrderName" name="newOrderName" class="w-40 placeholder-middle text-center rounded-lg border border-indigo-600 pl-4" type="number" placeholder="1" min="0" v-model="choiceUpdateData.orderName" required />
+                <input id="newFeeRate" name="newFeeRate" class="w-40 placeholder-middle text-center rounded-lg border border-indigo-600 pl-4" type="number" placeholder="1" min="0" step="0.01" v-model="choiceUpdateData.feeRate" required />
+                <div class="w-40">{{ choiceUpdateData.totalFee = Math.round(choiceUpdateData.feeRate * choiceUpdateData.orderName * choiceUpdateData.price)}}</div>
+                <div class="w-40">{{ choiceUpdateData.totalAmount = Math.round(choiceUpdateData.feeRate * choiceUpdateData.orderName * choiceUpdateData.price + choiceUpdateData.price * choiceUpdateData.orderName)}}</div>
+                <input id="newAccount" name="newAccount" class="w-40 placeholder-middle text-center rounded-lg border border-indigo-600" type="text" v-model="choiceUpdateData.account" :minlength="1" required>   
+              </div>
+            </div>
+          </li>
+        </ul>
       </div>
     </div>
 
